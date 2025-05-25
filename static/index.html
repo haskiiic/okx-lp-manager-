@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥞 OKX LP管理系统 - 专业区块链操作面板</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-layer-group brand-icon"></i>
+                <span class="brand-text">OKX LP管理系统</span>
+                <span class="version-badge">v1.0.0</span>
+            </div>
+            <div class="nav-status">
+                <div class="connection-status" id="connectionStatus">
+                    <div class="status-indicator offline"></div>
+                    <span>连接中...</span>
+                </div>
+                <div class="network-selector">
+                    <select id="networkSelect" class="network-select">
+                        <option value="bsc">BSC Chain</option>
+                        <option value="ethereum">Ethereum</option>
+                        <option value="polygon">Polygon</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <div class="main-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <div class="menu-section">
+                    <h3 class="menu-title">核心功能</h3>
+                    <ul class="menu-list">
+                        <li class="menu-item active" data-tab="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>仪表盘</span>
+                        </li>
+                        <li class="menu-item" data-tab="positions">
+                            <i class="fas fa-coins"></i>
+                            <span>LP头寸管理</span>
+                        </li>
+                        <li class="menu-item" data-tab="create">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>创建LP头寸</span>
+                        </li>
+                        <li class="menu-item" data-tab="batch">
+                            <i class="fas fa-layer-group"></i>
+                            <span>批量操作</span>
+                        </li>
+                        <li class="menu-item" data-tab="rebalance">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>自动重平衡</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="menu-section">
+                    <h3 class="menu-title">钱包管理</h3>
+                    <ul class="menu-list">
+                        <li class="menu-item" data-tab="wallet">
+                            <i class="fas fa-wallet"></i>
+                            <span>钱包余额</span>
+                        </li>
+                        <li class="menu-item" data-tab="pools">
+                            <i class="fas fa-swimming-pool"></i>
+                            <span>流动性池</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="menu-section">
+                    <h3 class="menu-title">系统工具</h3>
+                    <ul class="menu-list">
+                        <li class="menu-item" data-tab="monitoring">
+                            <i class="fas fa-chart-line"></i>
+                            <span>实时监控</span>
+                        </li>
+                        <li class="menu-item" data-tab="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>系统设置</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="content">
+            <!-- 仪表盘 -->
+            <div id="dashboard" class="tab-content active">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-tachometer-alt"></i>
+                        系统仪表盘
+                    </h1>
+                    <p class="page-subtitle">实时监控您的LP头寸和收益</p>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" id="totalPositions">0</h3>
+                            <p class="stat-label">总LP头寸</p>
+                            <span class="stat-change positive">+0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" id="totalValue">$0.00</h3>
+                            <p class="stat-label">总价值</p>
+                            <span class="stat-change positive">+0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" id="totalFees">$0.00</h3>
+                            <p class="stat-label">累计手续费</p>
+                            <span class="stat-change positive">+0%</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon info">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" id="activeRebalance">0</h3>
+                            <p class="stat-label">活跃重平衡</p>
+                            <span class="stat-change neutral">策略中</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 钱包地址输入 -->
+                <div class="wallet-input-section">
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-wallet input-icon"></i>
+                            <input type="text" id="walletAddress" placeholder="输入钱包地址 (0x...)" class="wallet-input">
+                        </div>
+                        <button id="loadWalletBtn" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            加载钱包
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 快速操作面板 -->
+                <div class="quick-actions">
+                    <h2 class="section-title">快速操作</h2>
+                    <div class="action-grid">
+                        <button class="action-btn" data-tab="create">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>创建新LP</span>
+                        </button>
+                        <button class="action-btn" data-tab="positions">
+                            <i class="fas fa-list"></i>
+                            <span>查看头寸</span>
+                        </button>
+                        <button class="action-btn" data-tab="batch">
+                            <i class="fas fa-layer-group"></i>
+                            <span>批量操作</span>
+                        </button>
+                        <button class="action-btn" data-tab="monitoring">
+                            <i class="fas fa-chart-line"></i>
+                            <span>启动监控</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LP头寸管理 -->
+            <div id="positions" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-coins"></i>
+                        LP头寸管理
+                    </h1>
+                    <div class="header-actions">
+                        <button id="refreshPositions" class="btn btn-outline">
+                            <i class="fas fa-sync-alt"></i>
+                            刷新
+                        </button>
+                        <button id="exportPositions" class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            导出
+                        </button>
+                    </div>
+                </div>
+
+                <div class="positions-container">
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>状态筛选:</label>
+                            <select id="statusFilter" class="filter-select">
+                                <option value="all">全部状态</option>
+                                <option value="active">活跃</option>
+                                <option value="closed">已关闭</option>
+                                <option value="outofrange">超出范围</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>代币对:</label>
+                            <input type="text" id="tokenFilter" placeholder="搜索代币对..." class="filter-input">
+                        </div>
+                    </div>
+
+                    <div class="positions-table-container">
+                        <table class="positions-table" id="positionsTable">
+                            <thead>
+                                <tr>
+                                    <th>代币对</th>
+                                    <th>价格范围</th>
+                                    <th>流动性</th>
+                                    <th>当前价格</th>
+                                    <th>收益率</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positionsTableBody">
+                                <tr class="empty-row">
+                                    <td colspan="7" class="empty-message">
+                                        <i class="fas fa-search"></i>
+                                        <p>请输入钱包地址加载LP头寸</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 创建LP头寸 -->
+            <div id="create" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-plus-circle"></i>
+                        创建LP头寸
+                    </h1>
+                    <p class="page-subtitle">设置您的流动性头寸参数</p>
+                </div>
+
+                <form id="createLPForm" class="create-form">
+                    <div class="form-grid">
+                        <!-- 基本设置 -->
+                        <div class="form-section">
+                            <h3 class="section-title">基本设置</h3>
+                            <div class="form-group">
+                                <label for="createWalletAddress">钱包地址 *</label>
+                                <input type="text" id="createWalletAddress" required class="form-input"
+                                    placeholder="0x...">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="createNetwork">网络 *</label>
+                                    <select id="createNetwork" required class="form-select">
+                                        <option value="bsc">BSC Chain</option>
+                                        <option value="ethereum">Ethereum</option>
+                                        <option value="polygon">Polygon</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="feeTier">费率等级 *</label>
+                                    <select id="feeTier" required class="form-select">
+                                        <option value="100">0.01%</option>
+                                        <option value="500">0.05%</option>
+                                        <option value="3000" selected>0.3%</option>
+                                        <option value="10000">1%</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 代币设置 -->
+                        <div class="form-section">
+                            <h3 class="section-title">代币配置</h3>
+                            <div class="token-config">
+                                <div class="token-group">
+                                    <h4>代币 A</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="token0Symbol">代币符号 *</label>
+                                            <input type="text" id="token0Symbol" required class="form-input"
+                                                placeholder="BNB">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="token0Address">合约地址 *</label>
+                                            <input type="text" id="token0Address" required class="form-input"
+                                                placeholder="0x...">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="amount0Desired">投入数量 *</label>
+                                        <input type="number" id="amount0Desired" required class="form-input"
+                                            step="0.000001" placeholder="0.0">
+                                    </div>
+                                </div>
+
+                                <div class="token-separator">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+
+                                <div class="token-group">
+                                    <h4>代币 B</h4>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="token1Symbol">代币符号 *</label>
+                                            <input type="text" id="token1Symbol" required class="form-input"
+                                                placeholder="USDT">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="token1Address">合约地址 *</label>
+                                            <input type="text" id="token1Address" required class="form-input"
+                                                placeholder="0x...">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="amount1Desired">投入数量 *</label>
+                                        <input type="number" id="amount1Desired" required class="form-input"
+                                            step="0.000001" placeholder="0.0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 价格范围设置 -->
+                        <div class="form-section">
+                            <h3 class="section-title">价格范围设置</h3>
+                            <div class="price-range-config">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="priceLower">最低价格 *</label>
+                                        <input type="number" id="priceLower" required class="form-input" step="0.000001"
+                                            placeholder="0.0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="priceUpper">最高价格 *</label>
+                                        <input type="number" id="priceUpper" required class="form-input" step="0.000001"
+                                            placeholder="0.0">
+                                    </div>
+                                </div>
+                                <div class="price-range-visual">
+                                    <div class="range-bar">
+                                        <div class="range-fill"></div>
+                                        <div class="current-price-marker" title="当前价格">
+                                            <span>当前</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="previewLP" class="btn btn-outline">
+                            <i class="fas fa-eye"></i>
+                            预览
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i>
+                            创建LP头寸
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 批量操作 -->
+            <div id="batch" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-layer-group"></i>
+                        批量操作
+                    </h1>
+                    <p class="page-subtitle">批量创建和管理多个LP头寸</p>
+                </div>
+
+                <div class="batch-container">
+                    <div class="batch-actions">
+                        <button id="addBatchItem" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            添加头寸配置
+                        </button>
+                        <button id="importBatchConfig" class="btn btn-outline">
+                            <i class="fas fa-upload"></i>
+                            导入配置
+                        </button>
+                        <button id="exportBatchConfig" class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            导出配置
+                        </button>
+                    </div>
+
+                    <div class="batch-list" id="batchList">
+                        <div class="empty-batch">
+                            <i class="fas fa-plus-circle"></i>
+                            <p>点击"添加头寸配置"开始批量创建</p>
+                        </div>
+                    </div>
+
+                    <div class="batch-summary" id="batchSummary" style="display: none;">
+                        <h3>批量操作摘要</h3>
+                        <div class="summary-stats">
+                            <div class="summary-item">
+                                <span class="summary-label">配置数量:</span>
+                                <span class="summary-value" id="batchCount">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">预估总价值:</span>
+                                <span class="summary-value" id="batchTotalValue">$0.00</span>
+                            </div>
+                        </div>
+                        <button id="executeBatch" class="btn btn-primary">
+                            <i class="fas fa-rocket"></i>
+                            执行批量创建
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 自动重平衡 -->
+            <div id="rebalance" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-balance-scale"></i>
+                        自动重平衡
+                    </h1>
+                    <p class="page-subtitle">配置智能重平衡策略</p>
+                </div>
+
+                <div class="rebalance-container">
+                    <form id="rebalanceForm" class="rebalance-form">
+                        <div class="form-section">
+                            <h3 class="section-title">重平衡配置</h3>
+                            <div class="form-group">
+                                <label for="rebalanceWalletAddress">钱包地址 *</label>
+                                <input type="text" id="rebalanceWalletAddress" required class="form-input"
+                                    placeholder="0x...">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rebalanceFeeTier">费率等级</label>
+                                    <select id="rebalanceFeeTier" class="form-select">
+                                        <option value="100">0.01%</option>
+                                        <option value="500">0.05%</option>
+                                        <option value="3000" selected>0.3%</option>
+                                        <option value="10000">1%</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="priceRangePercent">价格范围百分比</label>
+                                    <input type="number" id="priceRangePercent" class="form-input" value="10" min="1"
+                                        max="50" step="0.1">
+                                    <small class="form-help">±10% 表示当前价格上下10%的范围</small>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rebalanceThreshold">重平衡阈值</label>
+                                    <input type="number" id="rebalanceThreshold" class="form-input" value="5" min="1"
+                                        max="20" step="0.1">
+                                    <small class="form-help">价格偏离5%时触发重平衡</small>
+                                </div>
+                                <div class="form-group">
+                                    <label class="switch-label">
+                                        <input type="checkbox" id="rebalanceEnabled" class="switch-input">
+                                        <span class="switch-slider"></span>
+                                        启用自动重平衡
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                保存配置
+                            </button>
+                            <button type="button" id="checkRebalanceStatus" class="btn btn-outline">
+                                <i class="fas fa-search"></i>
+                                查看状态
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- 重平衡状态显示 -->
+                    <div class="rebalance-status" id="rebalanceStatus" style="display: none;">
+                        <h3 class="section-title">重平衡状态</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span class="status-label">配置状态:</span>
+                                <span class="status-value" id="configStatus">未配置</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">最后执行:</span>
+                                <span class="status-value" id="lastExecution">从未执行</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">下次检查:</span>
+                                <span class="status-value" id="nextCheck">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 钱包余额 -->
+            <div id="wallet" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-wallet"></i>
+                        钱包余额
+                    </h1>
+                    <div class="header-actions">
+                        <button id="refreshBalance" class="btn btn-outline">
+                            <i class="fas fa-sync-alt"></i>
+                            刷新余额
+                        </button>
+                    </div>
+                </div>
+
+                <div class="wallet-container">
+                    <div class="wallet-input-section">
+                        <div class="input-group">
+                            <div class="input-wrapper">
+                                <i class="fas fa-wallet input-icon"></i>
+                                <input type="text" id="balanceWalletAddress" placeholder="输入钱包地址查询余额"
+                                    class="wallet-input">
+                            </div>
+                            <button id="loadBalanceBtn" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                                查询余额
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="balance-display" id="balanceDisplay" style="display: none;">
+                        <div class="balance-summary">
+                            <h3>余额总览</h3>
+                            <div class="total-value">
+                                <span class="value" id="totalBalanceValue">$0.00</span>
+                                <span class="label">总价值 (USD)</span>
+                            </div>
+                        </div>
+
+                        <div class="balance-table-container">
+                            <table class="balance-table">
+                                <thead>
+                                    <tr>
+                                        <th>代币</th>
+                                        <th>余额</th>
+                                        <th>价格 (USD)</th>
+                                        <th>价值 (USD)</th>
+                                        <th>24h变化</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="balanceTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 流动性池 -->
+            <div id="pools" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-swimming-pool"></i>
+                        流动性池信息
+                    </h1>
+                    <p class="page-subtitle">查询PancakeSwap流动性池详细信息</p>
+                </div>
+
+                <div class="pools-container">
+                    <form id="poolQueryForm" class="pool-query-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="poolToken0">代币0地址</label>
+                                <input type="text" id="poolToken0" class="form-input" placeholder="0x..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="poolToken1">代币1地址</label>
+                                <input type="text" id="poolToken1" class="form-input" placeholder="0x..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="poolFeeTier">费率等级</label>
+                                <select id="poolFeeTier" class="form-select">
+                                    <option value="100">0.01%</option>
+                                    <option value="500">0.05%</option>
+                                    <option value="3000" selected>0.3%</option>
+                                    <option value="10000">1%</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i>
+                                    查询池信息
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="pool-info-display" id="poolInfoDisplay" style="display: none;">
+                        <div class="pool-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">池地址:</span>
+                                <span class="stat-value" id="poolAddress">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">总流动性:</span>
+                                <span class="stat-value" id="poolLiquidity">$0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">24h交易量:</span>
+                                <span class="stat-value" id="poolVolume">$0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">当前价格:</span>
+                                <span class="stat-value" id="poolPrice">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 实时监控 -->
+            <div id="monitoring" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-chart-line"></i>
+                        实时监控
+                    </h1>
+                    <div class="header-actions">
+                        <button id="startMonitoring" class="btn btn-primary">
+                            <i class="fas fa-play"></i>
+                            启动监控
+                        </button>
+                        <button id="stopMonitoring" class="btn btn-danger" style="display: none;">
+                            <i class="fas fa-stop"></i>
+                            停止监控
+                        </button>
+                    </div>
+                </div>
+
+                <div class="monitoring-container">
+                    <div class="monitoring-status" id="monitoringStatus">
+                        <div class="status-indicator offline"></div>
+                        <span>监控未启动</span>
+                    </div>
+
+                    <div class="monitoring-logs">
+                        <h3>监控日志</h3>
+                        <div class="logs-container" id="logsContainer">
+                            <div class="log-entry info">
+                                <span class="log-time">等待启动</span>
+                                <span class="log-message">点击"启动监控"开始实时监控</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统设置 -->
+            <div id="settings" class="tab-content">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-cog"></i>
+                        系统设置
+                    </h1>
+                    <p class="page-subtitle">配置系统参数和API设置</p>
+                </div>
+
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>API配置</h3>
+                        <div class="form-group">
+                            <label>API基础URL</label>
+                            <input type="text" id="apiBaseUrl" class="form-input" value="/api/v1" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>默认网络</label>
+                            <select id="defaultNetwork" class="form-select">
+                                <option value="bsc">BSC Chain</option>
+                                <option value="ethereum">Ethereum</option>
+                                <option value="polygon">Polygon</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>系统状态</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span class="status-label">API状态:</span>
+                                <span class="status-value" id="apiStatus">检查中...</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">数据库连接:</span>
+                                <span class="status-value" id="dbStatus">检查中...</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">系统版本:</span>
+                                <span class="status-value">v1.0.0</span>
+                            </div>
+                        </div>
+                        <button id="systemHealthCheck" class="btn btn-outline">
+                            <i class="fas fa-heartbeat"></i>
+                            系统健康检查
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 加载覆盖层 -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <span class="loading-text">处理中...</span>
+        </div>
+    </div>
+
+    <!-- 通知系统 -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- 模态框 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">标题</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                内容
+            </div>
+            <div class="modal-footer">
+                <button id="modalCancel" class="btn btn-outline">取消</button>
+                <button id="modalConfirm" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

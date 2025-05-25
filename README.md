@@ -78,7 +78,8 @@ source .venv/bin/activate  # Linux/Mac
 # .venv\Scripts\activate  # Windows
 
 # 安装依赖
-pip install -r requirements.txt
+pip install poetry
+poetry install --no-root
 ```
 
 ### 3. 配置环境变量
