@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # 主应用服务
+  app:
+    build: .
+    container_name: okx_lp_manager
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://okx_user:okx_password@postgres:5432/okx_lp_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+    restart: unless-stopped
+    networks:
+      - okx_network
+
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: okx_postgres
+    environment:
+      POSTGRES_DB: okx_lp_db
+      POSTGRES_USER: okx_user
+      POSTGRES_PASSWORD: okx_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - okx_network
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: okx_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - okx_network
+
+  # 数据库管理工具 (可选)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: okx_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@okx.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - okx_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  okx_network:
+    driver: bridge 
